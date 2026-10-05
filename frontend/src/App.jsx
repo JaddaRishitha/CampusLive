@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://campuslive-api.onrender.com";
 const CAMPUS_RADIUS = 250;
 const CAMPUS_LOCATION = {
   name: "Vishnu Women's College",
