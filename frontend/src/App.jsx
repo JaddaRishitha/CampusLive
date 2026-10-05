@@ -1,9 +1,10 @@
-
 import { useState, useEffect } from "react";
 import "./App.css";
 
 const API_URL = "https://campuslive-api.onrender.com";
+
 const CAMPUS_RADIUS = 250;
+
 const CAMPUS_LOCATION = {
   name: "Vishnu Women's College",
   latitude: 16.56860357990701,
@@ -11,14 +12,32 @@ const CAMPUS_LOCATION = {
 };
 
 function App() {
+  // =========================
+  // LOGIN STATE
+  // =========================
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginMessage, setLoginMessage] = useState("");
+
+  const [loginForm, setLoginForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // =========================
+  // CAMPUS ISSUE STATE
+  // =========================
   const [issues, setIssues] = useState([]);
   const [activePage, setActivePage] = useState("Dashboard");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
   const [userLocation, setUserLocation] = useState(null);
-const [locationStatus, setLocationStatus] = useState("not_checked");
-const [locationMessage, setLocationMessage] = useState("");
+  const [locationStatus, setLocationStatus] = useState("not_checked");
+  const [locationMessage, setLocationMessage] = useState("");
 
   const [form, setForm] = useState({
     location: "",
@@ -26,7 +45,67 @@ const [locationMessage, setLocationMessage] = useState("");
     description: "",
   });
 
-  // Load saved issues from the backend
+  // =========================
+  // LOGIN FORM HANDLER
+  // =========================
+  const handleLoginChange = (e) => {
+    setLoginForm({
+      ...loginForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // =========================
+  // LOGIN
+  // =========================
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    if (!loginForm.email.trim() || !loginForm.password.trim()) {
+      setLoginMessage("Please enter your email and password.");
+      return;
+    }
+
+    setLoginLoading(true);
+    setLoginMessage("");
+
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: loginForm.email,
+          password: loginForm.password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.detail || "Invalid email or password");
+      }
+
+      setCurrentUser(result.user);
+      setIsLoggedIn(true);
+      setLoginMessage("");
+
+      setLoginForm({
+        email: "",
+        password: "",
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      setLoginMessage(error.message || "Login failed. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  // =========================
+  // LOAD ISSUES
+  // =========================
   const loadIssues = async () => {
     try {
       const response = await fetch(`${API_URL}/issues`);
@@ -46,129 +125,185 @@ const [locationMessage, setLocationMessage] = useState("");
     }
   };
 
+  // =========================
+  // LOAD ISSUES AFTER LOGIN
+  // =========================
   useEffect(() => {
-  loadIssues();
+    if (!isLoggedIn) {
+      return;
+    }
 
-  const interval = setInterval(() => {
     loadIssues();
-  }, 60 * 1000);
 
-  return () => clearInterval(interval);
-}, []);
-  // Cancel a reported issue
-const cancelIssue = async (issueId) => {
-  const confirmCancel = window.confirm(
-    "Are you sure you want to cancel this issue request?"
-  );
+    const interval = setInterval(() => {
+      loadIssues();
+    }, 60 * 1000);
 
-  if (!confirmCancel) return;
+    return () => clearInterval(interval);
+  }, [isLoggedIn]);
 
-  try {
-    const response = await fetch(
-      `http://127.0.0.1:8000/issues/${issueId}/cancel`,
-      {
-        method: "PATCH",
-      }
+  // =========================
+  // CANCEL ISSUE
+  // =========================
+  const cancelIssue = async (issueId) => {
+    const confirmCancel = window.confirm(
+      "Are you sure you want to cancel this issue request?"
     );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || "Failed to cancel issue");
-    }
+    if (!confirmCancel) return;
 
-    alert("Issue request cancelled successfully!");
-
-    // Reload issues to show the updated status
-    await loadIssues();
-
-  } catch (error) {
-    console.error("Error cancelling issue:", error);
-    alert(error.message || "Failed to cancel issue. Please try again.");
-  }
-};
-// Get the student's current GPS location
-const checkLocation = () => {
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371000; // Earth's radius in meters
-
-  const toRadians = (degrees) => (degrees * Math.PI) / 180;
-
-  const dLat = toRadians(lat2 - lat1);
-  const dLon = toRadians(lon2 - lon1);
-
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) ** 2;
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return R * c;
-};
-  if (!navigator.geolocation) {
-    setLocationStatus("error");
-    setLocationMessage("Location is not supported by this browser.");
-    return;
-  }
-
-  setLocationStatus("checking");
-  setLocationMessage("Detecting your location...");
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-
-      setUserLocation({ latitude, longitude });
-
-const distance = calculateDistance(
-  latitude,
-  longitude,
-  CAMPUS_LOCATION.latitude,
-  CAMPUS_LOCATION.longitude
-);
-
-if (distance <= CAMPUS_RADIUS) {
-  setLocationStatus("inside");
-  setLocationMessage(
-    `✅ You are inside the ${CAMPUS_LOCATION.name} campus area.`
-  );
-} else {
-  setLocationStatus("outside");
-  setLocationMessage(
-    `❌ You are outside the ${CAMPUS_LOCATION.name} campus area. Distance: ${Math.round(distance)} meters.`
-  );
-}
-    },
-    (error) => {
-      console.error("Location error:", error);
-      setLocationStatus("error");
-      setLocationMessage(
-        "Unable to access location. Please allow location permission."
+    try {
+      const response = await fetch(
+        `${API_URL}/issues/${issueId}/cancel`,
+        {
+          method: "PATCH",
+        }
       );
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0,
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.detail || "Failed to cancel issue"
+        );
+      }
+
+      alert("Issue request cancelled successfully!");
+
+      await loadIssues();
+    } catch (error) {
+      console.error("Error cancelling issue:", error);
+      alert(
+        error.message ||
+          "Failed to cancel issue. Please try again."
+      );
     }
-  );
-};
-  // Handle form inputs
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Submit issue to FastAPI
+  // =========================
+  // CHECK CAMPUS LOCATION
+  // =========================
+  const checkLocation = () => {
+    const calculateDistance = (
+      lat1,
+      lon1,
+      lat2,
+      lon2
+    ) => {
+      const R = 6371000;
+
+      const toRadians = (degrees) =>
+        (degrees * Math.PI) / 180;
+
+      const dLat = toRadians(lat2 - lat1);
+      const dLon = toRadians(lon2 - lon1);
+
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRadians(lat1)) *
+          Math.cos(toRadians(lat2)) *
+          Math.sin(dLon / 2) ** 2;
+
+      const c =
+        2 *
+        Math.atan2(
+          Math.sqrt(a),
+          Math.sqrt(1 - a)
+        );
+
+      return R * c;
+    };
+
+    if (!navigator.geolocation) {
+      setLocationStatus("error");
+      setLocationMessage(
+        "Location is not supported by this browser."
+      );
+      return;
+    }
+
+    setLocationStatus("checking");
+    setLocationMessage("Detecting your location...");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        setUserLocation({
+          latitude,
+          longitude,
+        });
+
+        const distance = calculateDistance(
+          latitude,
+          longitude,
+          CAMPUS_LOCATION.latitude,
+          CAMPUS_LOCATION.longitude
+        );
+
+        if (distance <= CAMPUS_RADIUS) {
+          setLocationStatus("inside");
+
+          setLocationMessage(
+            `You are inside the ${CAMPUS_LOCATION.name} campus area.`
+          );
+        } else {
+          setLocationStatus("outside");
+
+          setLocationMessage(
+            `You are outside the ${CAMPUS_LOCATION.name} campus area. Distance: ${Math.round(
+              distance
+            )} meters.`
+          );
+        }
+      },
+
+      (error) => {
+        console.error("Location error:", error);
+
+        setLocationStatus("error");
+
+        setLocationMessage(
+          "Unable to access location. Please allow location permission."
+        );
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
+  };
+
+  // =========================
+  // FORM INPUT HANDLER
+  // =========================
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // =========================
+  // SUBMIT ISSUE
+  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (locationStatus !== "inside") {
-  alert("You must be inside the SVECW campus area to report an issue. Please check your location.");
-  return;
-}
 
-    if (!form.location.trim() || !form.category || !form.description.trim()) {
+    if (locationStatus !== "inside") {
+      alert(
+        "You must be inside the SVECW campus area to report an issue. Please check your location."
+      );
+      return;
+    }
+
+    if (
+      !form.location.trim() ||
+      !form.category ||
+      !form.description.trim()
+    ) {
       setMessage("Please fill in all fields.");
       return;
     }
@@ -192,7 +327,9 @@ if (distance <= CAMPUS_RADIUS) {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.detail || "Could not submit issue");
+        throw new Error(
+          result.detail || "Could not submit issue"
+        );
       }
 
       setForm({
@@ -203,78 +340,93 @@ if (distance <= CAMPUS_RADIUS) {
 
       setMessage("Issue reported successfully!");
 
-      // Refresh the issue list from the database
       await loadIssues();
     } catch (error) {
       console.error("Error submitting issue:", error);
-      setMessage("Failed to submit issue. Check your backend.");
+      setMessage(
+        "Failed to submit issue. Check your backend."
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Reusable report form
+  // =========================
+  // REPORT FORM
+  // =========================
   const renderReportForm = () => (
     <div className="panel report-panel">
       <div className="panel-heading">
         <div>
           <h3>Report a Campus Issue</h3>
-          <p>Help us identify and fix campus problems.</p>
+          <p>
+            Help us identify and fix campus problems.
+          </p>
         </div>
+
         <span className="heading-icon">✎</span>
       </div>
 
       <form onSubmit={handleSubmit}>
-  <button
-    type="button"
-    onClick={checkLocation}
-    disabled={locationStatus === "checking"}
-    className="submit-btn"
-  >
-    {locationStatus === "checking"
-      ? "Detecting Location..."
-      : "📍 Check My Location"}
-  </button>
+        <button
+          type="button"
+          onClick={checkLocation}
+          disabled={locationStatus === "checking"}
+          className="submit-btn"
+        >
+          {locationStatus === "checking"
+            ? "Detecting Location..."
+            : "📍 Check My Location"}
+        </button>
 
-  {locationMessage && (
-    <p className="message">{locationMessage}</p>
-  )}
+        {locationMessage && (
+          <p className="message">
+            {locationMessage}
+          </p>
+        )}
 
-  <label>Detected Campus</label>
-<input
-  value={
-    locationStatus === "inside"
-      ? CAMPUS_LOCATION.name
-      : ""
-  }
-  readOnly
-  placeholder="Check your location to detect campus"
-/>
+        <label>Detected Campus</label>
 
-<label>Block / Location</label>
-<select
-  name="location"
-  value={form.location}
-  onChange={handleChange}
->
-  <option value="">Select your location</option>
-  <option>Block A</option>
-  <option>Block B</option>
-  <option>Block C</option>
-  <option>Block D</option>
-  <option>Computer Lab</option>
-  <option>Library</option>
-  <option>Admin Block</option>
-  <option>Other</option>
-</select>
+        <input
+          value={
+            locationStatus === "inside"
+              ? CAMPUS_LOCATION.name
+              : ""
+          }
+          readOnly
+          placeholder="Check your location to detect campus"
+        />
+
+        <label>Block / Location</label>
+
+        <select
+          name="location"
+          value={form.location}
+          onChange={handleChange}
+        >
+          <option value="">
+            Select your location
+          </option>
+          <option>Block A</option>
+          <option>Block B</option>
+          <option>Block C</option>
+          <option>Block D</option>
+          <option>Computer Lab</option>
+          <option>Library</option>
+          <option>Admin Block</option>
+          <option>Other</option>
+        </select>
 
         <label>Issue Category</label>
+
         <select
           name="category"
           value={form.category}
           onChange={handleChange}
         >
-          <option value="">Select a category</option>
+          <option value="">
+            Select a category
+          </option>
           <option>Technical</option>
           <option>Electrical</option>
           <option>Cleanliness</option>
@@ -284,6 +436,7 @@ if (distance <= CAMPUS_RADIUS) {
         </select>
 
         <label>Issue Description</label>
+
         <textarea
           name="description"
           value={form.description}
@@ -297,24 +450,38 @@ if (distance <= CAMPUS_RADIUS) {
           className="submit-btn"
           disabled={submitting}
         >
-          {submitting ? "Submitting..." : "Submit Issue →"}
+          {submitting
+            ? "Submitting..."
+            : "Submit Issue →"}
         </button>
 
-        {message && <p className="message">{message}</p>}
+        {message && (
+          <p className="message">
+            {message}
+          </p>
+        )}
       </form>
     </div>
   );
 
-  // Reusable issue list
+  // =========================
+  // ISSUE LIST
+  // =========================
   const renderIssueList = (list) => {
-    if (loading) return <p>Loading issues...</p>;
+    if (loading) {
+      return <p>Loading issues...</p>;
+    }
 
     if (list.length === 0) {
       return (
         <div className="empty-state">
           <div className="empty-icon">📋</div>
+
           <h4>No issues reported yet</h4>
-          <p>Campus issues you report will appear here.</p>
+
+          <p>
+            Campus issues you report will appear here.
+          </p>
         </div>
       );
     }
@@ -322,44 +489,126 @@ if (distance <= CAMPUS_RADIUS) {
     return (
       <div className="issue-list">
         {list.map((issue) => (
-          <div className="issue-item" key={issue.id}>
-            <div className="issue-icon">📍</div>
+          <div
+            className="issue-item"
+            key={issue.id}
+          >
+            <div className="issue-icon">
+              📍
+            </div>
 
             <div className="issue-details">
-              <strong>{issue.category}</strong>
+              <strong>
+                {issue.category}
+              </strong>
+
               <p>{issue.location}</p>
-              <small>{issue.description}</small>
+
+              <small>
+                {issue.description}
+              </small>
+
               <span className="issue-date">
                 {issue.createdAt || ""}
               </span>
             </div>
 
             <div className="issue-actions">
-  <span className="status">
-    {issue.status || "Reported"}
-  </span>
+              <span className="status">
+                {issue.status || "Reported"}
+              </span>
 
-  {(issue.status || "Reported") === "Reported" && (
-    <button
-      className="cancel-btn"
-      onClick={() => cancelIssue(issue.id)}
-    >
-      Cancel Request
-    </button>
-  )}
-</div>
+              {(issue.status || "Reported") ===
+                "Reported" && (
+                <button
+                  className="cancel-btn"
+                  onClick={() =>
+                    cancelIssue(issue.id)
+                  }
+                >
+                  Cancel Request
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
     );
   };
 
+  // =========================
+  // NAVIGATION
+  // =========================
   const navItems = [
-    { name: "Dashboard", icon: "▦" },
-    { name: "Report an Issue", icon: "＋" },
-    { name: "Issue History", icon: "◷" },
+    {
+      name: "Dashboard",
+      icon: "▦",
+    },
+    {
+      name: "Report an Issue",
+      icon: "＋",
+    },
+    {
+      name: "Issue History",
+      icon: "◷",
+    },
   ];
 
+  // =========================
+  // LOGIN SCREEN
+  // =========================
+  if (!isLoggedIn) {
+    return (
+      <div className="login-page">
+        <div className="login-box">
+          <h1>
+            Campus<span>Live</span>
+          </h1>
+
+          <p>
+            Login to your campus account
+          </p>
+
+          <form onSubmit={handleLogin}>
+            <input
+              type="email"
+              name="email"
+              value={loginForm.email}
+              onChange={handleLoginChange}
+              placeholder="Email"
+            />
+
+            <input
+              type="password"
+              name="password"
+              value={loginForm.password}
+              onChange={handleLoginChange}
+              placeholder="Password"
+            />
+
+            <button
+              type="submit"
+              disabled={loginLoading}
+            >
+              {loginLoading
+                ? "Logging in..."
+                : "Login"}
+            </button>
+          </form>
+
+          {loginMessage && (
+            <p className="login-message">
+              {loginMessage}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // =========================
+  // MAIN CAMPUSLIVE APP
+  // =========================
   return (
     <div className="app">
       <aside className="sidebar">
@@ -367,13 +616,17 @@ if (distance <= CAMPUS_RADIUS) {
           Campus<span>Live</span>
         </h2>
 
-        <p className="side-label">WORKSPACE</p>
+        <p className="side-label">
+          WORKSPACE
+        </p>
 
         {navItems.map((item) => (
           <div
             key={item.name}
             className={`nav-item ${
-              activePage === item.name ? "active" : ""
+              activePage === item.name
+                ? "active"
+                : ""
             }`}
             onClick={() => {
               setActivePage(item.name);
@@ -385,10 +638,24 @@ if (distance <= CAMPUS_RADIUS) {
         ))}
 
         <div className="sidebar-bottom">
-          <div className="profile-avatar">R</div>
+          <div className="profile-avatar">
+            {currentUser?.name
+              ? currentUser.name
+                  .charAt(0)
+                  .toUpperCase()
+              : "R"}
+          </div>
+
           <div>
-            <strong>Campus User</strong>
-            <p>Student Account</p>
+            <strong>
+              {currentUser?.name ||
+                "Campus User"}
+            </strong>
+
+            <p>
+              {currentUser?.role ||
+                "Student"}
+            </p>
           </div>
         </div>
       </aside>
@@ -399,6 +666,7 @@ if (distance <= CAMPUS_RADIUS) {
             <p className="breadcrumb">
               Workspace / {activePage}
             </p>
+
             <h2>
               {activePage === "Dashboard"
                 ? "Campus Dashboard"
@@ -407,9 +675,12 @@ if (distance <= CAMPUS_RADIUS) {
           </div>
 
           <div className="live-badge">
-            <span className="live-dot"></span> CampusLive
+            <span className="live-dot"></span>
+            CampusLive
           </div>
         </header>
+
+        {/* DASHBOARD */}
 
         {activePage === "Dashboard" && (
           <>
@@ -418,41 +689,82 @@ if (distance <= CAMPUS_RADIUS) {
                 <p className="welcome-tag">
                   YOUR CAMPUS, CONNECTED
                 </p>
-                <h1>Good day! 👋</h1>
+
+                <h1>
+                  Good day,{" "}
+                  {currentUser?.name ||
+                    "Campus User"}!
+                </h1>
+
                 <p>
-                  A better campus starts with you. Report issues
-                  and help make your campus a better place.
+                  A better campus starts with
+                  you. Report issues and help
+                  make your campus a better
+                  place.
                 </p>
               </div>
-              <div className="welcome-icon">🏫</div>
+
+              <div className="welcome-icon">
+                🏫
+              </div>
             </section>
 
             <section className="stats-grid">
               <div className="stat-card">
-                <div className="stat-icon purple">▤</div>
+                <div className="stat-icon purple">
+                  ▤
+                </div>
+
                 <p>Total Issues</p>
-                <h2>{issues.length}</h2>
-                <span>Issues reported here</span>
+
+                <h2>
+                  {issues.length}
+                </h2>
+
+                <span>
+                  Issues reported here
+                </span>
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon orange">◷</div>
+                <div className="stat-icon orange">
+                  ◷
+                </div>
+
                 <p>Pending Issues</p>
+
                 <h2>
                   {issues.filter(
-                    (i) => (i.status || "Reported") === "Reported"
+                    (i) =>
+                      (i.status ||
+                        "Reported") ===
+                      "Reported"
                   ).length}
                 </h2>
-                <span>Awaiting attention</span>
+
+                <span>
+                  Awaiting attention
+                </span>
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon green">✓</div>
+                <div className="stat-icon green">
+                  ✓
+                </div>
+
                 <p>Resolved Issues</p>
+
                 <h2>
-                  {issues.filter((i) => i.status === "Resolved").length}
+                  {issues.filter(
+                    (i) =>
+                      i.status ===
+                      "Resolved"
+                  ).length}
                 </h2>
-                <span>Successfully resolved</span>
+
+                <span>
+                  Successfully resolved
+                </span>
               </div>
             </section>
 
@@ -462,17 +774,32 @@ if (distance <= CAMPUS_RADIUS) {
               <div className="panel activity-panel">
                 <div className="panel-heading">
                   <div>
-                    <h3>Recent Issues</h3>
-                    <p>Your recently reported campus issues.</p>
+                    <h3>
+                      Recent Issues
+                    </h3>
+
+                    <p>
+                      Your recently reported
+                      campus issues.
+                    </p>
                   </div>
-                  <span className="heading-icon">▤</span>
+
+                  <span className="heading-icon">
+                    ▤
+                  </span>
                 </div>
 
-                {renderIssueList(issues.slice(0, 5))}
+                {renderIssueList(
+                  issues.slice(0, 5)
+                )}
 
                 <button
                   className="submit-btn"
-                  onClick={() => setActivePage("Issue History")}
+                  onClick={() =>
+                    setActivePage(
+                      "Issue History"
+                    )
+                  }
                 >
                   View All Issues →
                 </button>
@@ -481,18 +808,28 @@ if (distance <= CAMPUS_RADIUS) {
           </>
         )}
 
-        {activePage === "Report an Issue" && (
+        {/* REPORT ISSUE */}
+
+        {activePage ===
+          "Report an Issue" && (
           <section className="content-grid">
             {renderReportForm()}
           </section>
         )}
 
-        {activePage === "Issue History" && (
+        {/* ISSUE HISTORY */}
+
+        {activePage ===
+          "Issue History" && (
           <section className="panel history-panel">
             <div className="panel-heading">
               <div>
                 <h3>Issue History</h3>
-                <p>All reported campus issues.</p>
+
+                <p>
+                  All reported campus
+                  issues.
+                </p>
               </div>
             </div>
 
@@ -501,8 +838,14 @@ if (distance <= CAMPUS_RADIUS) {
         )}
 
         <footer>
-          <span>© 2026 CampusLive</span>
-          <span>Making campus life better, together.</span>
+          <span>
+            © 2026 CampusLive
+          </span>
+
+          <span>
+            Making campus life better,
+            together.
+          </span>
         </footer>
       </main>
     </div>
