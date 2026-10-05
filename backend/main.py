@@ -45,7 +45,15 @@ class IssueDB(Base):
     description = Column(String, nullable=False)
     status = Column(String, default="Reported", nullable=False)
     cancelled_at = Column(DateTime, nullable=True)
+# User database table
+class UserDB(Base):
+    __tablename__ = "users"
 
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+    role = Column(String, default="Student", nullable=False)
 
 # Create table automatically
 Base.metadata.create_all(bind=engine)
@@ -85,6 +93,13 @@ class Issue(BaseModel):
     description: str
 
 
+class UserCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+    role: str = "Student"
+
+
 # Database session
 def get_db():
     db = SessionLocal()
@@ -97,7 +112,76 @@ def get_db():
 @app.get("/")
 def home():
     return {"message": "Welcome to CampusLive!"}
+# Create a new user
+@app.post("/signup")
+def signup(user: UserCreate, db: Session = Depends(get_db)):
 
+    existing_user = db.query(UserDB).filter(
+        UserDB.email == user.email
+    ).first()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
+
+    new_user = UserDB(
+        name=user.name,
+        email=user.email,
+        password=user.password,
+        role=user.role
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return {
+        "message": "Account created successfully",
+        "user": {
+            "id": new_user.id,
+            "name": new_user.name,
+            "email": new_user.email,
+            "role": new_user.role
+        }
+    }
+
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
+@app.post("/login")
+def login(user: UserLogin, db: Session = Depends(get_db)):
+
+    existing_user = db.query(UserDB).filter(
+        UserDB.email == user.email
+    ).first()
+
+    if not existing_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
+    if existing_user.password != user.password:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid email or password"
+        )
+
+    return {
+        "message": "Login successful",
+        "user": {
+            "id": existing_user.id,
+            "name": existing_user.name,
+            "email": existing_user.email,
+            "role": existing_user.role
+        }
+    }
 
 # Create and save an issue
 @app.post("/issues")
