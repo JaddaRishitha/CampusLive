@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 * {
@@ -12,16 +11,25 @@ body {
   color: #20243a;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font: inherit;
 }
+
+/* =========================================
+   MAIN APP
+========================================= */
 
 .app {
   display: flex;
   min-height: 100vh;
 }
 
-/* Sidebar */
+/* =========================================
+   SIDEBAR
+========================================= */
 
 .sidebar {
   width: 245px;
@@ -56,6 +64,13 @@ button, input, select, textarea {
   border-radius: 9px;
   color: #b9bad0;
   font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.nav-item:hover {
+  background: #24243d;
+  color: white;
 }
 
 .nav-item.active {
@@ -90,7 +105,9 @@ button, input, select, textarea {
   font-size: 11px;
 }
 
-/* Main area */
+/* =========================================
+   MAIN AREA
+========================================= */
 
 .main-content {
   flex: 1;
@@ -134,7 +151,9 @@ button, input, select, textarea {
   margin-right: 6px;
 }
 
-/* Welcome banner */
+/* =========================================
+   WELCOME BANNER
+========================================= */
 
 .welcome {
   background: linear-gradient(110deg, #6e61e8, #9484f6);
@@ -173,7 +192,9 @@ button, input, select, textarea {
   padding: 10px 18px;
 }
 
-/* Statistics */
+/* =========================================
+   STATISTICS
+========================================= */
 
 .stats-grid {
   display: grid;
@@ -182,7 +203,8 @@ button, input, select, textarea {
   margin-bottom: 25px;
 }
 
-.stat-card, .panel {
+.stat-card,
+.panel {
   background: white;
   border: 1px solid #ececf3;
   border-radius: 13px;
@@ -217,12 +239,13 @@ button, input, select, textarea {
 }
 
 .stat-card p {
-  color: #777b91;
+  color: #475569 !important;
   font-size: 13px;
   margin: 15px 0 5px;
 }
 
 .stat-card h2 {
+  color: #1e293b !important;
   font-size: 27px;
   margin: 0 0 5px;
 }
@@ -232,7 +255,9 @@ button, input, select, textarea {
   font-size: 11px;
 }
 
-/* Panels */
+/* =========================================
+   PANELS
+========================================= */
 
 .content-grid {
   display: grid;
@@ -271,7 +296,9 @@ button, input, select, textarea {
   padding: 10px;
 }
 
-/* Form */
+/* =========================================
+   FORM
+========================================= */
 
 form {
   display: flex;
@@ -284,7 +311,9 @@ form label {
   margin: 0 0 8px;
 }
 
-form input, form select, form textarea {
+form input,
+form select,
+form textarea {
   border: 1px solid #e4e5ed;
   border-radius: 8px;
   padding: 12px;
@@ -296,7 +325,9 @@ form input, form select, form textarea {
   width: 100%;
 }
 
-form input:focus, form select:focus, form textarea:focus {
+form input:focus,
+form select:focus,
+form textarea:focus {
   border-color: #796ce8;
   box-shadow: 0 0 0 3px #796ce81a;
 }
@@ -317,10 +348,16 @@ form textarea {
   display: flex;
   justify-content: center;
   gap: 10px;
+  transition: 0.2s ease;
 }
 
 .submit-btn:hover {
   background: #5f52d4;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .message {
@@ -329,7 +366,9 @@ form textarea {
   margin-bottom: 0;
 }
 
-/* Recent issues */
+/* =========================================
+   RECENT ISSUES
+========================================= */
 
 .empty-state {
   text-align: center;
@@ -380,7 +419,8 @@ form textarea {
   font-size: 13px;
 }
 
-.issue-details p, .issue-details small {
+.issue-details p,
+.issue-details small {
   display: block;
   font-size: 11px;
   color: #777b91;
@@ -404,7 +444,46 @@ form textarea {
   white-space: nowrap;
 }
 
-/* Footer */
+.issue-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* =========================================
+   CANCEL REQUEST BUTTON
+========================================= */
+
+.cancel-btn {
+  background-color: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.cancel-btn:hover {
+  background-color: #e11d48;
+  color: #ffffff;
+  border-color: #e11d48;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(225, 29, 72, 0.2);
+}
+
+.cancel-btn:focus-visible {
+  outline: 2px solid #e11d48;
+  outline-offset: 3px;
+}
+
+/* =========================================
+   FOOTER
+========================================= */
 
 footer {
   display: flex;
@@ -413,10 +492,527 @@ footer {
   font-size: 11px;
   padding: 25px 0 5px;
 }
+/* =========================================
+   CAMPUSLIVE SPLASH SCREEN
+========================================= */
 
-/* Responsive design */
+.splash-screen {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #5547d9 0%,
+    #7164e8 50%,
+    #9284f3 100%
+  );
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative background circles */
+
+.splash-screen::before,
+.splash-screen::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.splash-screen::before {
+  width: 420px;
+  height: 420px;
+  top: -180px;
+  left: -150px;
+}
+
+.splash-screen::after {
+  width: 520px;
+  height: 520px;
+  right: -220px;
+  bottom: -250px;
+}
+
+/* Circular logo */
+
+.splash-logo {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.25);
+  display: grid;
+  place-items: center;
+  animation: splashLogoAppear 0.8s ease-out,
+             splashLogoPulse 2s ease-in-out infinite;
+  position: relative;
+  z-index: 2;
+}
+
+.splash-logo-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: white;
+  color: #6254dd;
+  display: grid;
+  place-items: center;
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  box-shadow: 0 15px 35px rgba(35, 26, 100, 0.25);
+}
+
+/* App name */
+
+.splash-title {
+  margin: 25px 0 5px;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  animation: splashTextAppear 0.8s ease-out;
+  position: relative;
+  z-index: 2;
+}
+
+.splash-title span {
+  color: #d8d3ff;
+}
+
+/* Tagline */
+
+.splash-tagline {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  opacity: 0.9;
+  animation: splashTextAppear 1s ease-out;
+  position: relative;
+  z-index: 2;
+}
+
+/* Loading bar */
+
+.splash-loader {
+  width: 150px;
+  height: 4px;
+  margin-top: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
+
+.splash-loader-bar {
+  height: 100%;
+  width: 0;
+  background: white;
+  border-radius: 10px;
+  animation: splashLoading 8s linear forwards;
+}
+
+/* =========================================
+   SPLASH ANIMATIONS
+========================================= */
+
+@keyframes splashLogoAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.5) rotate(-20deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes splashLogoPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 0 18px rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes splashTextAppear {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashLoading {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+/* Mobile splash */
+
+@media (max-width: 480px) {
+  .splash-logo {
+    width: 90px;
+    height: 90px;
+  }
+
+  .splash-logo-inner {
+    font-size: 40px;
+  }
+
+  .splash-title {
+    font-size: 34px;
+  }
+
+  .splash-tagline {
+    font-size: 13px;
+  }
+
+  .splash-loader {
+    width: 130px;
+  }
+}
+
+/* =========================================
+   CAMPUSLIVE LOGIN PAGE
+========================================= */
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  background: #f7f8fc;
+}
+
+/* LEFT VISUAL */
+
+.login-visual {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  background: linear-gradient(
+    145deg,
+    #5547d9 0%,
+    #7164e8 45%,
+    #9284f3 100%
+  );
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+
+.login-visual-content {
+  position: relative;
+  z-index: 2;
+  max-width: 560px;
+  text-align: center;
+}
+
+.login-brand {
+  font-size: 46px;
+  font-weight: 800;
+  letter-spacing: -2px;
+}
+
+.login-brand span {
+  color: #d8d3ff;
+}
+
+.login-tagline {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 8px 0 35px;
+  opacity: 0.9;
+}
+
+/* Decorative circles */
+
+.login-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.login-circle.one {
+  width: 360px;
+  height: 360px;
+  top: -130px;
+  left: -120px;
+}
+
+.login-circle.two {
+  width: 500px;
+  height: 500px;
+  right: -240px;
+  bottom: -250px;
+}
+
+/* Campus illustration */
+
+.campus-illustration {
+  width: 330px;
+  height: 220px;
+  margin: 0 auto 35px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.campus-building {
+  position: relative;
+  width: 250px;
+  height: 145px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 20px 35px rgba(35, 26, 100, 0.25);
+}
+
+.campus-roof {
+  position: absolute;
+  width: 280px;
+  height: 25px;
+  left: -15px;
+  top: -25px;
+  background: #ddd9ff;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.campus-window {
+  position: absolute;
+  width: 30px;
+  height: 35px;
+  background: #7164e8;
+  border: 5px solid #e4e1ff;
+  border-radius: 3px;
+}
+
+.campus-window.one {
+  left: 25px;
+  top: 30px;
+}
+
+.campus-window.two {
+  left: 80px;
+  top: 30px;
+}
+
+.campus-window.three {
+  right: 80px;
+  top: 30px;
+}
+
+.campus-window.four {
+  right: 25px;
+  top: 30px;
+}
+
+.campus-door {
+  position: absolute;
+  width: 42px;
+  height: 65px;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #5547d9;
+  border-radius: 5px 5px 0 0;
+}
+
+/* Login description */
+
+.login-description {
+  max-width: 450px;
+  margin: 0 auto;
+  font-size: 14px;
+  line-height: 1.8;
+  opacity: 0.88;
+}
+
+/* RIGHT SIDE */
+
+.login-form-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+  background: #ffffff;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 430px;
+}
+
+.login-small-label {
+  color: #7164e8;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.login-box h1 {
+  color: #20243a;
+  font-size: 32px;
+  line-height: 1.2;
+  margin: 0 0 10px;
+  letter-spacing: -1px;
+}
+
+.login-box > p {
+  color: #8b8da3;
+  font-size: 13px;
+  margin: 0 0 32px;
+  line-height: 1.6;
+}
+
+.login-box form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-box form label {
+  color: #34374d;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.login-box form input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  margin-bottom: 20px;
+  border: 1px solid #dedfea;
+  border-radius: 9px;
+  background: #fafaff;
+  color: #292c40;
+  font-size: 13px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.login-box form input::placeholder {
+  color: #a5a7b7;
+}
+
+.login-box form input:focus {
+  border-color: #7164e8;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(113, 100, 232, 0.1);
+}
+
+.login-box form button {
+  width: 100%;
+  height: 49px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 9px;
+  background: linear-gradient(
+    110deg,
+    #6254dd,
+    #796ce8
+  );
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: 0 8px 18px rgba(113, 100, 232, 0.22);
+}
+
+.login-box form button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(113, 100, 232, 0.28);
+}
+
+.login-box form button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-message {
+  margin: 18px 0 0 !important;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: #fff1f2;
+  color: #d92d55 !important;
+  font-size: 12px !important;
+  line-height: 1.5;
+}
+
+.login-footer {
+  margin-top: 35px;
+  padding-top: 20px;
+  border-top: 1px solid #eeeeF4;
+  color: #a0a2b2;
+  font-size: 10px;
+  text-align: center;
+}
+
+/* =========================================
+   RESPONSIVE LOGIN
+========================================= */
+
+@media (max-width: 900px) {
+
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .login-visual {
+    min-height: 420px;
+    padding: 45px 25px;
+  }
+
+  .login-form-section {
+    min-height: auto;
+    padding: 50px 25px;
+  }
+
+  .login-brand {
+    font-size: 38px;
+  }
+
+  .campus-illustration {
+    transform: scale(0.85);
+    margin-top: -5px;
+    margin-bottom: 10px;
+  }
+
+  .login-description {
+    font-size: 13px;
+  }
+}
+
+/* =========================================
+   RESPONSIVE DASHBOARD
+========================================= */
 
 @media (max-width: 1000px) {
+
   .sidebar {
     width: 190px;
   }
@@ -431,6 +1027,7 @@ footer {
 }
 
 @media (max-width: 650px) {
+
   .sidebar {
     display: none;
   }
@@ -456,51 +1053,151 @@ footer {
     font-size: 20px;
   }
 
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .live-badge {
+    display: none;
+  }
+
+  .issue-item {
+    flex-wrap: wrap;
+  }
+
+  .issue-actions {
+    margin-left: auto;
+  }
+
   footer {
     gap: 10px;
     flex-wrap: wrap;
   }
 }
-.stat-card h2 {
-  color: #1e293b !important;
+
+@media (max-width: 480px) {
+
+  .login-visual {
+    min-height: 370px;
+    padding: 35px 20px;
+  }
+
+  .login-brand {
+    font-size: 34px;
+  }
+
+  .login-tagline {
+    font-size: 15px;
+    margin-bottom: 15px;
+  }
+
+  .campus-illustration {
+    transform: scale(0.7);
+    margin-top: -15px;
+    margin-bottom: -20px;
+  }
+
+  .login-description {
+    font-size: 12px;
+  }
+
+  .login-form-section {
+    padding: 40px 20px;
+  }
+
+  .login-box h1 {
+    font-size: 27px;
+  }
+}
+/* =========================================
+   SMOOTH SPLASH ANIMATIONS
+========================================= */
+
+.splash-logo {
+  animation:
+    splashLogoZoom 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    splashLogoPulse 2s ease-in-out 1.2s infinite;
 }
 
-.stat-card p {
-  color: #475569 !important;
-}
-/* Cancel Request button */
-.cancel-btn {
-  background-color: #fff1f2;
-  color: #e11d48;
-  border: 1px solid #fecdd3;
-  padding: 5px 9px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+.splash-title {
+  opacity: 0;
+  animation: splashTitleAppear 0.9s ease-out 0.7s forwards;
 }
 
-/* Hover effect */
-.cancel-btn:hover {
-  background-color: #e11d48;
-  color: #ffffff;
-  border-color: #e11d48;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(225, 29, 72, 0.2);
+.splash-tagline {
+  opacity: 0;
+  animation: splashTaglineAppear 0.8s ease-out 1.2s forwards;
 }
 
-/* Keyboard focus */
-.cancel-btn:focus-visible {
-  outline: 2px solid #e11d48;
-  outline-offset: 3px;
+@keyframes splashLogoZoom {
+  0% {
+    opacity: 0;
+    transform: scale(0.25);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-/* Status and button layout */
-.issue-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
+@keyframes splashTitleAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes splashTaglineAppear {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+}
+/* =========================================
+   SPLASH TO LOGIN TRANSITION
+========================================= */
+
+.splash-screen {
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
+}
+
+.splash-screen.splash-exit {
+  opacity: 0;
+  transform: scale(1.04);
+}
+
+/* Login page enters smoothly */
+
+.login-page {
+  animation: loginPageEnter 0.9s ease-out forwards;
+}
+
+@keyframes loginPageEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }

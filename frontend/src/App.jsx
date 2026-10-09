@@ -16,6 +16,8 @@ function App() {
   // LOGIN STATE
   // =========================
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashExiting, setSplashExiting] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
 
@@ -25,7 +27,23 @@ function App() {
   });
 
   const [currentUser, setCurrentUser] = useState(null);
+// =========================
+// SPLASH SCREEN
+// =========================
+useEffect(() => {
+  const exitTimer = setTimeout(() => {
+    setSplashExiting(true);
+  }, 3500);
 
+  const removeTimer = setTimeout(() => {
+    setShowSplash(false);
+  }, 4300);
+
+  return () => {
+    clearTimeout(exitTimer);
+    clearTimeout(removeTimer);
+  };
+}, []);
   // =========================
   // CAMPUS ISSUE STATE
   // =========================
@@ -97,7 +115,9 @@ function App() {
       });
     } catch (error) {
       console.error("Login error:", error);
-      setLoginMessage(error.message || "Login failed. Please try again.");
+      setLoginMessage(
+        error.message || "Login failed. Please try again."
+      );
     } finally {
       setLoginLoading(false);
     }
@@ -143,43 +163,6 @@ function App() {
   }, [isLoggedIn]);
 
   // =========================
-  // CANCEL ISSUE
-  // =========================
-  const cancelIssue = async (issueId) => {
-    const confirmCancel = window.confirm(
-      "Are you sure you want to cancel this issue request?"
-    );
-
-    if (!confirmCancel) return;
-
-    try {
-      const response = await fetch(
-        `${API_URL}/issues/${issueId}/cancel`,
-        {
-          method: "PATCH",
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.detail || "Failed to cancel issue"
-        );
-      }
-
-      alert("Issue request cancelled successfully!");
-
-      await loadIssues();
-    } catch (error) {
-      console.error("Error cancelling issue:", error);
-      alert(
-        error.message ||
-          "Failed to cancel issue. Please try again."
-      );
-    }
-  };
-
-  // =========================
   // CHECK CAMPUS LOCATION
   // =========================
   const checkLocation = () => {
@@ -215,14 +198,19 @@ function App() {
 
     if (!navigator.geolocation) {
       setLocationStatus("error");
+
       setLocationMessage(
         "Location is not supported by this browser."
       );
+
       return;
     }
 
     setLocationStatus("checking");
-    setLocationMessage("Detecting your location...");
+
+    setLocationMessage(
+      "Detecting your location..."
+    );
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -342,12 +330,59 @@ function App() {
 
       await loadIssues();
     } catch (error) {
-      console.error("Error submitting issue:", error);
+      console.error(
+        "Error submitting issue:",
+        error
+      );
+
       setMessage(
         "Failed to submit issue. Check your backend."
       );
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // =========================
+  // CANCEL ISSUE
+  // =========================
+  const cancelIssue = async (issueId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this issue request?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_URL}/issues/${issueId}/cancel`,
+        {
+          method: "PATCH",
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.detail || "Could not cancel issue"
+        );
+      }
+
+      setMessage("Issue request cancelled successfully.");
+
+      await loadIssues();
+    } catch (error) {
+      console.error(
+        "Error cancelling issue:",
+        error
+      );
+
+      setMessage(
+        "Failed to cancel issue. Please try again."
+      );
     }
   };
 
@@ -359,6 +394,7 @@ function App() {
       <div className="panel-heading">
         <div>
           <h3>Report a Campus Issue</h3>
+
           <p>
             Help us identify and fix campus problems.
           </p>
@@ -407,6 +443,7 @@ function App() {
           <option value="">
             Select your location
           </option>
+
           <option>Block A</option>
           <option>Block B</option>
           <option>Block C</option>
@@ -427,6 +464,7 @@ function App() {
           <option value="">
             Select a category
           </option>
+
           <option>Technical</option>
           <option>Electrical</option>
           <option>Cleanliness</option>
@@ -553,55 +591,150 @@ function App() {
       icon: "◷",
     },
   ];
+  // =========================
+// SPLASH SCREEN
+// =========================
+if (showSplash) {
+  return (
+    <div className={`splash-screen ${splashExiting ? "splash-exit" : ""}`}>
+      <div className="splash-logo">
+        <div className="splash-logo-inner">
+          C
+        </div>
+      </div>
 
+      <h1 className="splash-title">
+        Campus<span>Live</span>
+      </h1>
+
+      <p className="splash-tagline">
+        Your Campus. Your Voice.
+      </p>
+    </div>
+  );
+}
   // =========================
   // LOGIN SCREEN
   // =========================
   if (!isLoggedIn) {
     return (
       <div className="login-page">
-        <div className="login-box">
-          <h1>
-            Campus<span>Live</span>
-          </h1>
 
-          <p>
-            Login to your campus account
-          </p>
+        {/* LEFT SIDE */}
+        <div className="login-visual">
 
-          <form onSubmit={handleLogin}>
-            <input
-              type="email"
-              name="email"
-              value={loginForm.email}
-              onChange={handleLoginChange}
-              placeholder="Email"
-            />
+          <div className="login-circle one"></div>
+          <div className="login-circle two"></div>
 
-            <input
-              type="password"
-              name="password"
-              value={loginForm.password}
-              onChange={handleLoginChange}
-              placeholder="Password"
-            />
+          <div className="login-visual-content">
 
-            <button
-              type="submit"
-              disabled={loginLoading}
-            >
-              {loginLoading
-                ? "Logging in..."
-                : "Login"}
-            </button>
-          </form>
+            <div className="login-brand">
+              Campus<span>Live</span>
+            </div>
 
-          {loginMessage && (
-            <p className="login-message">
-              {loginMessage}
+            <p className="login-tagline">
+              Your Campus. Your Voice.
             </p>
-          )}
+
+            {/* CAMPUS ILLUSTRATION */}
+            <div className="campus-illustration">
+
+              <div className="campus-building">
+
+                <div className="campus-roof"></div>
+
+                <div className="campus-window one"></div>
+                <div className="campus-window two"></div>
+                <div className="campus-window three"></div>
+                <div className="campus-window four"></div>
+
+                <div className="campus-door"></div>
+
+              </div>
+
+            </div>
+
+            <p className="login-description">
+              Report campus issues, track their progress,
+              and help create a better campus experience
+              for everyone.
+            </p>
+
+          </div>
         </div>
+
+        {/* RIGHT SIDE */}
+        <div className="login-form-section">
+
+          <div className="login-box">
+
+            <div className="login-small-label">
+              WELCOME BACK
+            </div>
+
+            <h1>
+              Login to CampusLive
+            </h1>
+
+            <p>
+              Sign in to access your campus dashboard.
+            </p>
+
+            <form onSubmit={handleLogin}>
+
+              <label htmlFor="login-email">
+                Email Address
+              </label>
+
+              <input
+                id="login-email"
+                type="email"
+                name="email"
+                value={loginForm.email}
+                onChange={handleLoginChange}
+                placeholder="Enter your email"
+                autoComplete="email"
+              />
+
+              <label htmlFor="login-password">
+                Password
+              </label>
+
+              <input
+                id="login-password"
+                type="password"
+                name="password"
+                value={loginForm.password}
+                onChange={handleLoginChange}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+              />
+
+              <button
+                type="submit"
+                disabled={loginLoading}
+              >
+                {loginLoading
+                  ? "Logging in..."
+                  : "Login to CampusLive →"}
+              </button>
+
+            </form>
+
+            {loginMessage && (
+              <p className="login-message">
+                {loginMessage}
+              </p>
+            )}
+
+            <div className="login-footer">
+              Secure campus access • CampusLive © 2026
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
     );
   }
@@ -611,7 +744,9 @@ function App() {
   // =========================
   return (
     <div className="app">
+
       <aside className="sidebar">
+
         <h2 className="logo">
           Campus<span>Live</span>
         </h2>
@@ -638,6 +773,7 @@ function App() {
         ))}
 
         <div className="sidebar-bottom">
+
           <div className="profile-avatar">
             {currentUser?.name
               ? currentUser.name
@@ -647,6 +783,7 @@ function App() {
           </div>
 
           <div>
+
             <strong>
               {currentUser?.name ||
                 "Campus User"}
@@ -656,13 +793,19 @@ function App() {
               {currentUser?.role ||
                 "Student"}
             </p>
+
           </div>
+
         </div>
+
       </aside>
 
       <main className="main-content">
+
         <header className="topbar">
+
           <div>
+
             <p className="breadcrumb">
               Workspace / {activePage}
             </p>
@@ -672,20 +815,25 @@ function App() {
                 ? "Campus Dashboard"
                 : activePage}
             </h2>
+
           </div>
 
           <div className="live-badge">
             <span className="live-dot"></span>
             CampusLive
           </div>
+
         </header>
 
         {/* DASHBOARD */}
 
         {activePage === "Dashboard" && (
           <>
+
             <section className="welcome">
+
               <div>
+
                 <p className="welcome-tag">
                   YOUR CAMPUS, CONNECTED
                 </p>
@@ -702,15 +850,19 @@ function App() {
                   make your campus a better
                   place.
                 </p>
+
               </div>
 
               <div className="welcome-icon">
                 🏫
               </div>
+
             </section>
 
             <section className="stats-grid">
+
               <div className="stat-card">
+
                 <div className="stat-icon purple">
                   ▤
                 </div>
@@ -724,9 +876,11 @@ function App() {
                 <span>
                   Issues reported here
                 </span>
+
               </div>
 
               <div className="stat-card">
+
                 <div className="stat-icon orange">
                   ◷
                 </div>
@@ -745,9 +899,11 @@ function App() {
                 <span>
                   Awaiting attention
                 </span>
+
               </div>
 
               <div className="stat-card">
+
                 <div className="stat-icon green">
                   ✓
                 </div>
@@ -758,22 +914,30 @@ function App() {
                   {issues.filter(
                     (i) =>
                       i.status ===
-                      "Resolved"
+                      "Resolved" ||
+                      i.status ===
+                      "Completed"
                   ).length}
                 </h2>
 
                 <span>
                   Successfully resolved
                 </span>
+
               </div>
+
             </section>
 
             <section className="content-grid">
+
               {renderReportForm()}
 
               <div className="panel activity-panel">
+
                 <div className="panel-heading">
+
                   <div>
+
                     <h3>
                       Recent Issues
                     </h3>
@@ -782,11 +946,13 @@ function App() {
                       Your recently reported
                       campus issues.
                     </p>
+
                   </div>
 
                   <span className="heading-icon">
                     ▤
                   </span>
+
                 </div>
 
                 {renderIssueList(
@@ -803,8 +969,11 @@ function App() {
                 >
                   View All Issues →
                 </button>
+
               </div>
+
             </section>
+
           </>
         )}
 
@@ -822,22 +991,31 @@ function App() {
         {activePage ===
           "Issue History" && (
           <section className="panel history-panel">
+
             <div className="panel-heading">
+
               <div>
-                <h3>Issue History</h3>
+
+                <h3>
+                  Issue History
+                </h3>
 
                 <p>
                   All reported campus
                   issues.
                 </p>
+
               </div>
+
             </div>
 
             {renderIssueList(issues)}
+
           </section>
         )}
 
         <footer>
+
           <span>
             © 2026 CampusLive
           </span>
@@ -846,8 +1024,11 @@ function App() {
             Making campus life better,
             together.
           </span>
+
         </footer>
+
       </main>
+
     </div>
   );
 }
